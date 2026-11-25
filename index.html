@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCV et calculs T16</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#55653b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CCV T16">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: instrument de cours, sobre et précis, comme un outil de dotation.
+   IDEA: le CCV réel : base quadrillée fixe, disque transparent tournant gradué, crayon gras.
+   PICTURE: l'instrument lui-même, grand, manipulable au doigt.
+   COLOUR and TYPE: olive treillis, plaque blanche, index rouge ; Barlow Condensed (marquage) + Barlow.
+   LAYOUT: lecture au-dessus, instrument, outils ; panneau latéral sur grand écran. */
+:root{color-scheme:light dark;--bg:light-dark(#55653b,#141a0f);--card:light-dark(#f5f5ef,#222a1a);--ink:light-dark(#1c2016,#e7eadc);--mut:light-dark(#5c6253,#a7ae98);--bd:light-dark(#d6d8cb,#3a4530);--hd:#f3f4ea;--hdm:#c9d1b4;--red:light-dark(#b91c1c,#ff8a80);--blue:light-dark(#1d4ed8,#93b4ff);--grn:light-dark(#14532d,#86e0ad);--btn:light-dark(#e8e9df,#2e3824);--on:light-dark(#2c3523,#d6e3b8);--onT:light-dark(#fff,#18200f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,.big,.tools span,button{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+header{max-width:1240px;margin:0 auto;padding:22px max(4vw,14px) 14px;color:var(--hd)}
+h1{font-size:clamp(28px,4.4vw,44px);line-height:1.05;margin:0;font-weight:700;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--hdm)}
+.wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;max-width:1240px;margin:0 auto;padding:0 max(4vw,14px) 40px;align-items:start}
+@media(max-width:880px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px}
+.read{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 18px;align-items:baseline;margin-bottom:12px}
+.big{font-size:clamp(34px,6vw,50px);font-weight:700;line-height:1;white-space:nowrap}
+.read dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:15px}
+.read dt{color:var(--mut)}.read dd{margin:0;font-weight:600;white-space:nowrap}
+.lab{font-size:13px;color:var(--mut)}
+#cv{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;max-height:80vh;margin:0 auto}
+.fine{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:10px}
+button{font-size:16px;font-weight:600;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--bd);background:var(--btn);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+button[aria-pressed=true]{background:var(--on);color:var(--onT);border-color:var(--on)}
+input,select{font:16px Barlow,sans-serif;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--ink);width:100%}
+#idxIn{width:110px;text-align:right}
+.tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;min-height:58px}
+.tools svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tools span{font-size:13px;font-weight:600}
+@media(max-width:420px){.tools span{font-size:12px}}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.sw{width:44px;padding:0;display:grid;place-items:center}.sw i{width:22px;height:22px;border-radius:50%;display:block;border:2px solid #fff;box-shadow:0 0 0 1px #0005}
+.sw[aria-pressed=true]{background:var(--btn);box-shadow:inset 0 0 0 3px var(--on)}
+.syms button{width:52px;padding:0}.syms svg{width:28px;height:28px}
+.hint{font-size:14px;color:var(--mut);margin:10px 0 0}
+h2{font-size:24px;margin:0 0 10px;font-weight:700;line-height:1.1}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:block;font-size:14px;color:var(--mut)}
+.steps{display:grid;gap:8px;margin-top:12px}.steps button{text-align:left}
+details{margin-top:12px}summary{cursor:pointer;font-weight:600;min-height:32px}
+#msg{min-height:24px;font-weight:600;margin:10px 0 0}
+.help ol{padding-left:20px;margin:8px 0}.help li{margin-bottom:6px}
+.k-l{color:var(--red)}.k-t{color:var(--blue)}.k-w{color:var(--grn)}
+.modal{position:fixed;inset:0;background:#000a;display:grid;place-items:center;padding:16px;z-index:9}
+.modal[hidden]{display:none}
+.modal .box{background:var(--card);border-radius:14px;padding:16px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+.modal img{width:100%;border-radius:8px;display:block}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;margin-top:16px}
+.tabs button{background:transparent;color:var(--hd);border-color:#ffffff55;font-size:18px;padding:0 18px}
+.tabs button[aria-selected=true]{background:var(--hd);color:#1d2416;border-color:var(--hd)}
+.wrap2{max-width:1240px;margin:0 auto;padding:0 max(4vw,14px) 40px}
+.pnav{display:flex;flex-wrap:wrap;gap:6px}
+.inl{display:flex;align-items:center;gap:8px;white-space:nowrap}.inl select{width:auto}
+.chk{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}.chk input{width:22px;height:22px;min-height:0}
+.tgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:880px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+@media(min-width:881px){.rescard{position:sticky;top:12px}}
+fieldset{border:1px solid var(--bd);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px}
+legend{font:700 17px "Barlow Condensed",sans-serif;padding:0 6px;color:var(--ink)}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:8px}
+.srow{display:grid;grid-template-columns:80px repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px}
+@media(max-width:520px){.srow{grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--bd);padding-bottom:8px}}
+.res{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;margin:0;align-items:baseline}
+.res dt{color:var(--mut)}.res dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.res dd.hl{font:700 24px "Barlow Condensed",sans-serif;color:var(--ink)}
+.warn{color:var(--red);font-weight:600}
+.det ol{padding-left:20px;margin:8px 0}.det li{margin-bottom:4px}
+.scroll{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--mut)}
+.note{color:var(--hdm);font-size:14px;max-width:80ch}
+@media (hover:hover) and (pointer:fine) and (min-width:900px){
+  #pane-ccv{grid-template-columns:minmax(0,1fr);padding-right:56px}
+  #pane-ccv #cv{max-height:calc(100vh - 230px)}
+  #pane-ccv aside{position:fixed;top:0;right:0;bottom:0;width:400px;z-index:5;overflow-y:auto;background:var(--card);box-shadow:-10px 0 30px #0005;padding:16px 16px 16px 54px;transform:translateX(calc(100% - 38px));transition:transform .22s ease}
+  #pane-ccv aside:hover,#pane-ccv aside:has(:focus-visible){transform:none}
+  #pane-ccv aside .card{padding:0;margin-bottom:18px;background:none}
+  #pane-ccv aside::before{content:"Outils de dessin";position:absolute;left:0;top:0;bottom:0;width:38px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);background:var(--on);color:var(--onT);font:600 16px "Barlow Condensed",sans-serif}
+  #pane-ccv .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Topographie : CCV et calculs au T16</h1>
+  <p>Disque gradué tournant à annoter, et calculs des procédés topographiques au théodolite Wild T16.</p>
+  <nav class="tabs" role="tablist" aria-label="Onglets">
+    <button role="tab" data-tab="ccv">CCV</button><button role="tab" data-tab="t16">Calculs T16</button>
+  </nav>
+</header>
+
+<div class="wrap" id="pane-ccv">
+<section>
+  <div class="card">
+    <svg id="cv" viewBox="-226 -226 452 452" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Calculateur des composantes du vent">
+      <g id="base"></g>
+      <g id="disc"><g id="ring"></g><g id="discAnn"></g></g>
+      <g id="baseAnn"></g>
+      <g id="idxg" pointer-events="none"></g>
+    </svg>
+    <div class="fine">
+      <button data-f="-2" id="f0">−100</button><button data-f="-1" id="f1">−10</button>
+      <input id="idxIn" type="number" inputmode="decimal" aria-label="Valeur à l'index">
+      <button data-f="1" id="f2">+10</button><button data-f="2" id="f3">+100</button>
+    </div>
+  </div>
+</section>
+
+<aside>
+  <div class="card">
+    <div class="tools" role="toolbar" aria-label="Outils">
+      <button data-tool="rot"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3v5h-5"/></svg><span>Tourner</span></button>
+      <button data-tool="pen"><svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/></svg><span>Crayon</span></button>
+      <button data-tool="arrow"><svg viewBox="0 0 24 24"><path d="M5 19L19 5M10 5h9v9"/></svg><span>Flèche</span></button>
+      <button data-tool="sym"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 3v18M3 12h18"/></svg><span>Symbole</span></button>
+      <button data-tool="text"><svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></svg><span>Texte</span></button>
+      <button data-tool="erase"><svg viewBox="0 0 24 24"><path d="M8 20h12M4 15l9-9 6 6-6 6H9z"/></svg><span>Gomme</span></button>
+    </div>
+    <div class="row syms" id="syms"></div>
+    <div class="row" id="cols"></div>
+    <div class="row">
+      <span class="lab">Trait</span>
+      <button data-w="2">Fin</button><button data-w="3.5">Moyen</button><button data-w="6">Épais</button>
+    </div>
+    <div class="row">
+      <span class="lab">Calque</span>
+      <button data-layer="disc">Disque mobile</button><button data-layer="base">Base fixe</button>
+    </div>
+    <p class="hint" id="hint"></p>
+    <div class="row">
+      <button id="undo">Annuler</button><button id="clr">Tout effacer</button><button id="exp">Image</button>
+    </div>
+  </div>
+
+
+  <div class="card help">
+    <h2>Mode d'emploi</h2>
+    <p class="lab">Outil « Tourner » : faites glisser le disque (ou molette ; Maj + molette = 100 ₥). Les annotations du calque « Disque mobile » tournent avec le disque, celles de la « Base fixe » restent en place. Tout est enregistré dans ce navigateur.</p>
+  </div>
+</aside>
+</div>
+
+<div class="wrap2" id="pane-t16" hidden>
+  <div class="card">
+    <div class="pnav" id="pnav" role="group" aria-label="Procédés"></div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="cn"> Correction sphéricité + réfraction</label>
+    </div>
+  </div>
+  <div class="tgrid">
+    <div class="card">
+      <h2 id="pt"></h2><p class="lab" id="pd"></p>
+      <div id="pin"></div>
+      <div class="row"><button id="pEx">Nouvel exemple</button><button id="pClr">Vider les champs</button></div>
+      <p class="lab">Chaque appui sur « Nouvel exemple » génère un jeu de valeurs fictives cohérentes.</p>
+    </div>
+    <div class="card rescard">
+      <h2>Résultats</h2>
+      <div id="pout" aria-live="polite"></div>
+      <div class="row"><button id="pCp">Copier les résultats</button></div>
+    </div>
+  </div>
+  <p class="note">Conventions : X vers l'Est, Y vers le Nord du quadrillage ; gisements comptés dans le sens horaire depuis le Nord du quadrillage ; angles en millièmes (6400 ₥) ; angle vertical exprimé en site (0 ₥ à l'horizontale, positif vers le haut) ; coordonnées arrondies au mètre.</p>
+</div>
+
+<div class="modal" id="tdlg" hidden><div class="box">
+  <label>Texte de l'annotation<input id="tIn" maxlength="40"></label>
+  <div class="row"><button id="tOk">Placer</button><button id="tNo">Annuler</button></div>
+</div></div>
+<div class="modal" id="xm" hidden><div class="box">
+  <img id="shot" alt="Image du calculateur annoté">
+  <p class="lab">Appui long (mobile) ou clic droit (ordinateur) sur l'image pour l'enregistrer.</p>
+  <button id="xClose">Fermer</button>
+</div></div>
+
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const NS='http://www.w3.org/2000/svg',R=170,RO=R+38,FF='Barlow Condensed, Arial Narrow, sans-serif';
+const K={house:'#dfe1d4',plate:'#f9f9f4',line:'#262a20',fine:'#c4c7b9',ring:'#2c3523',tick:'#f1f2e8',acc:'#c81e1e',acc2:'#1d4ed8',wind:'#14532d'};
+const COLS=[['Rouge','#c81e1e'],['Bleu','#1d4ed8'],['Noir','#1a1a1a'],['Vert','#15803d'],['Orange','#d9480f']];
+const SYMS=[['croix','Croix'],['pt','Point'],['obj','Objectif'],['sta','Station'],['pos','Position'],['rep','Repère'],['nord','Nord']];
+const HINT={rot:'Faites glisser le disque (ou la molette) pour le tourner.',pen:'Dessinez à main levée sur le calque choisi.',arrow:'Glissez pour tracer une flèche.',sym:'Choisissez un symbole puis touchez l\'endroit où le poser.',text:'Touchez l\'endroit où placer le texte.',erase:'Touchez une annotation pour la supprimer.'};
+const S={ang:0,tool:'rot',c:0,w:3.5,layer:'disc',sym:'obj',ann:[]};
+try{const d=JSON.parse(localStorage.getItem('ccv-v2'));if(d&&typeof d==='object')Object.assign(S,d)}catch(e){}
+const save=()=>{try{localStorage.setItem('ccv-v2',JSON.stringify(S))}catch(e){}};
+let hist=[];
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.append(e);return e};
+const full=()=>6400;
+const toU=d=>d*full()/360,toD=u=>u*360/full();
+const norm=a=>((a%360)+360)%360;
+const f1=v=>(Math.round(v*10)/10).toFixed(1).replace('.',',');
+const num=s=>parseFloat(String(s).replace(',','.'));
+const fmtA=d=>String(Math.round(toU(norm(d)))%6400).padStart(4,'0')+' ₥';
+const snap=d=>{const st=1;return norm(toD(Math.round(toU(d)/st)*st))};
+
+function drawBase(){const g=$('#base');g.replaceChildren();
+  el('rect',{x:-224,y:-224,width:448,height:448,rx:30,fill:K.house,stroke:'#b5b8a6'},g);
+  el('circle',{r:R,fill:K.plate},g);
+  const n=20,st=R/n;
+  for(let i=-n+1;i<n;i++){const p=i*st,h=Math.sqrt(R*R-p*p),m=i%5===0,o={stroke:m?K.line:K.fine,'stroke-width':i===0?1.6:m?.9:.6};
+    el('line',{x1:p,y1:-h,x2:p,y2:h,...o},g);el('line',{x1:-h,y1:p,x2:h,y2:p,...o},g)}
+  const tx=(x,y,s,a,w)=>{const t=el('text',{x,y,'text-anchor':a,'font-size':11,'font-weight':w||600,fill:K.line,'font-family':FF,stroke:K.plate,'stroke-width':3,'paint-order':'stroke'},g);t.textContent=s};
+  for(const j of [-3,-2,-1,1,2,3]){const v=Math.abs(j*10),p=j*R/4;tx(4,p+(j<0?12:-4),v,'start');tx(p+(j>0?-3:3),13,v,j>0?'end':'start')}
+  el('circle',{r:2.6,fill:K.line},g);
+  const ig=$('#idxg');ig.replaceChildren();
+  el('line',{x1:0,y1:-R+2,x2:0,y2:-RO,stroke:K.acc,'stroke-width':1.6},ig);
+  el('path',{d:`M0 ${-RO-2}L-9 ${-RO-15}H9Z`,fill:K.acc},ig);
+}
+function drawRing(){const g=$('#ring');g.replaceChildren();
+  el('circle',{r:R,fill:'rgba(140,190,215,.10)',stroke:'rgba(40,60,70,.35)'},g);
+  el('circle',{r:R+19,fill:'none',stroke:K.ring,'stroke-width':38},g);
+  const N=128;let d='';
+  for(let k=0;k<N;k++){const i=k*50,L=i%100?6:13;
+    const a=k*2*Math.PI/N,s=Math.sin(a),c=Math.cos(a);
+    d+=`M${(RO*s).toFixed(2)} ${(-RO*c).toFixed(2)}L${((RO-L)*s).toFixed(2)} ${(-(RO-L)*c).toFixed(2)}`;
+    if(i%100===0){const t=el('text',{transform:`rotate(${k*360/N}) translate(0 ${-(R+10)})`,'text-anchor':'middle','font-size':i%400?10.5:12.5,'font-weight':i%400?600:700,fill:K.tick,'font-family':FF},g);t.textContent=i/100}}
+  el('path',{d,stroke:K.tick,'stroke-width':1,fill:'none'},g);
+}
+function sym(g,s,x,y,c){const a={fill:'none',stroke:c,'stroke-width':2,'stroke-linejoin':'round'},h=el('g',{transform:`translate(${x} ${y})`},g);
+  el('circle',{r:13,fill:'transparent'},h);
+  if(s==='croix'){el('path',{d:'M-9 0H9M0-9V9',...a},h)}
+  if(s==='pt'){el('circle',{r:3.5,fill:c},h);el('circle',{r:7.5,...a},h)}
+  if(s==='obj'){el('circle',{r:7,...a},h);el('path',{d:'M-12 0H12M0-12V12',...a},h)}
+  if(s==='sta'){el('path',{d:'M0-10L9 6H-9Z',...a},h);el('circle',{r:2,fill:c},h)}
+  if(s==='pos'){el('rect',{x:-9,y:-7,width:18,height:14,...a},h);el('path',{d:'M-9-7L9 7M9-7L-9 7',...a,'stroke-width':1.2},h)}
+  if(s==='rep'){el('path',{d:'M-4 11V-11L9-5.5L-4 0',...a},h)}
+  if(s==='nord'){el('path',{d:'M0 11V-10M-5-4L0-11L5-4',...a},h);const t=el('text',{x:5,y:9,'font-size':10,'font-weight':700,fill:c,'font-family':FF},h);t.textContent='N'}
+}
+function drawAnn(){const G={disc:$('#discAnn'),base:$('#baseAnn')};G.disc.replaceChildren();G.base.replaceChildren();
+  S.ann.forEach((a,i)=>{const g=el('g',{'data-i':i},G[a.l]||G.disc),c=a.c;
+    if(a.t==='path'){const d='M'+a.p.map(p=>p[0]+' '+p[1]).join('L');el('path',{d,fill:'none',stroke:'transparent','stroke-width':16},g);el('path',{d,fill:'none',stroke:c,'stroke-width':a.w,'stroke-linecap':'round','stroke-linejoin':'round'},g)}
+    else if(a.t==='arrow'){const[[x1,y1],[x2,y2]]=a.p,an=Math.atan2(y2-y1,x2-x1),hl=8+a.w*2;
+      el('line',{x1,y1,x2,y2,stroke:'transparent','stroke-width':16},g);el('line',{x1,y1,x2,y2,stroke:c,'stroke-width':a.w,'stroke-linecap':'round'},g);
+      el('path',{d:`M${x2} ${y2}L${x2-hl*Math.cos(an-.45)} ${y2-hl*Math.sin(an-.45)}L${x2-hl*Math.cos(an+.45)} ${y2-hl*Math.sin(an+.45)}Z`,fill:c},g)}
+    else if(a.t==='text'){const t=el('text',{x:a.x,y:a.y,'text-anchor':'middle','dominant-baseline':'middle','font-size':12+a.w*1.6,'font-weight':700,fill:c,stroke:'#fff','stroke-width':3,'paint-order':'stroke','font-family':FF},g);t.textContent=a.s}
+    else sym(g,a.s,a.x,a.y,c)});
+}
+function update(){
+  if(document.activeElement!==$('#idxIn'))$('#idxIn').value=Math.round(toU(S.ang))%6400}
+function setRot(){$('#disc').setAttribute('transform',`rotate(${-S.ang})`);update()}
+function commit(){drawAnn();update();save()}
+function push(){hist.push(JSON.stringify(S.ann));if(hist.length>80)hist.shift()}
+let raf;
+function animTo(t){cancelAnimationFrame(raf);const a0=S.ang,d=((norm(t)-a0+540)%360)-180;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){S.ang=norm(t);setRot();save();return}
+  const t0=performance.now(),f=n=>{const k=Math.min(1,(n-t0)/650),e=1-Math.pow(1-k,3);S.ang=norm(a0+d*e);setRot();if(k<1)raf=requestAnimationFrame(f);else save()};
+  raf=requestAnimationFrame(f)}
+
+const svg=$('#cv');
+const loc=(e,g)=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(g.getScreenCTM().inverse());return[Math.round(q.x*10)/10,Math.round(q.y*10)/10]};
+const phi=(x,y)=>Math.atan2(x,-y)*180/Math.PI;
+const layerG=()=>S.layer==='base'?$('#baseAnn'):$('#discAnn');
+let drag=null;
+svg.addEventListener('pointerdown',e=>{const t=S.tool;
+  if(t==='erase'){const h=e.target.closest('[data-i]');if(h){push();S.ann.splice(+h.dataset.i,1);commit()}return}
+  if(t==='text'){const p=loc(e,layerG());askText(s=>{push();S.ann.push({t:'text',l:S.layer,c:COLS[S.c][1],w:S.w,s,x:p[0],y:p[1]});commit()});return}
+  e.preventDefault();svg.setPointerCapture(e.pointerId);
+  if(t==='rot'){const[x,y]=loc(e,svg);drag={k:'rot',a0:S.ang,f0:phi(x,y)};return}
+  const p=loc(e,layerG()),c=COLS[S.c][1];
+  if(t==='sym'){push();S.ann.push({t:'sym',l:S.layer,c,s:S.sym,x:p[0],y:p[1]});commit();return}
+  push();const a={t:t==='pen'?'path':'arrow',l:S.layer,c,w:S.w,p:[p,p]};S.ann.push(a);drag={k:t,a};drawAnn();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;
+  if(drag.k==='rot'){const[x,y]=loc(e,svg);S.ang=snap(drag.a0+drag.f0-phi(x,y));setRot();return}
+  const p=loc(e,layerG());if(drag.k==='pen')drag.a.p.push(p);else drag.a.p[1]=p;drawAnn()});
+const end=()=>{if(!drag)return;
+  if(drag.a){const[[a,b]]=drag.a.p,[c,d]=drag.a.p[drag.a.p.length-1];if(drag.k==='arrow'&&Math.hypot(c-a,d-b)<5){S.ann.pop();hist.pop()}}
+  drag=null;commit()};
+svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+svg.addEventListener('wheel',e=>{e.preventDefault();const st=e.shiftKey?100:10;S.ang=snap(S.ang+toD(st)*Math.sign(e.deltaY));setRot();save()},{passive:false});
+
+$$('[data-f]').forEach(b=>b.onclick=()=>{const k=+b.dataset.f,st=[100,10];S.ang=snap(S.ang+toD(Math.sign(k)*st[2-Math.abs(k)]));setRot();save()});
+$('#idxIn').onchange=e=>{const v=num(e.target.value);if(!isNaN(v)){animTo(toD(v))}};
+
+function askText(cb){const m=$('#tdlg'),i=$('#tIn');m.hidden=false;i.value='';setTimeout(()=>i.focus(),30);
+  const done=ok=>{m.hidden=true;$('#tOk').onclick=$('#tNo').onclick=i.onkeydown=null;if(ok&&i.value.trim())cb(i.value.trim())};
+  $('#tOk').onclick=()=>done(1);$('#tNo').onclick=()=>done(0);i.onkeydown=e=>{if(e.key==='Enter')done(1);if(e.key==='Escape')done(0)}}
+
+$('#syms').innerHTML=SYMS.map(([k,n])=>`<button data-sym="${k}" title="${n}" aria-label="${n}"><svg viewBox="-14 -14 28 28"></svg></button>`).join('');
+$$('[data-sym]').forEach(b=>sym(b.querySelector('svg'),b.dataset.sym,0,0,'currentColor'));
+$('#cols').innerHTML='<span class="lab">Couleur</span>'+COLS.map(([n,c],i)=>`<button class="sw" data-c="${i}" aria-label="${n}" title="${n}"><i style="background:${c}"></i></button>`).join('');
+function sync(){
+  $$('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===S.tool));
+  $$('[data-sym]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sym===S.sym));
+  $$('[data-c]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.c===S.c));
+  $$('[data-w]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.w===S.w));
+  $$('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.layer===S.layer));
+  $('#syms').hidden=S.tool!=='sym';$('#hint').textContent=HINT[S.tool];
+}
+$$('[data-tool]').forEach(b=>b.onclick=()=>{S.tool=b.dataset.tool;sync();save()});
+$$('[data-sym]').forEach(b=>b.onclick=()=>{S.sym=b.dataset.sym;sync();save()});
+$$('[data-c]').forEach(b=>b.onclick=()=>{S.c=+b.dataset.c;sync();save()});
+$$('[data-w]').forEach(b=>b.onclick=()=>{S.w=+b.dataset.w;sync();save()});
+$$('[data-layer]').forEach(b=>b.onclick=()=>{S.layer=b.dataset.layer;sync();save()});
+$('#undo').onclick=()=>{const h=hist.pop();if(h){S.ann=JSON.parse(h);commit()}};
+let clrT;$('#clr').onclick=e=>{const b=e.currentTarget;if(b.dataset.arm){push();S.ann=[];commit();delete b.dataset.arm;b.textContent='Tout effacer';return}
+  b.dataset.arm=1;b.textContent='Confirmer ?';clearTimeout(clrT);clrT=setTimeout(()=>{delete b.dataset.arm;b.textContent='Tout effacer'},3000)};
+
+$('#exp').onclick=()=>{const c=svg.cloneNode(true);c.setAttribute('width',1200);c.setAttribute('height',1200);
+  const img=new Image();img.onload=()=>{const k=document.createElement('canvas');k.width=k.height=1200;const x=k.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,1200,1200);x.drawImage(img,0,0,1200,1200);
+    try{$('#shot').src=k.toDataURL('image/png')}catch(er){$('#shot').src=img.src}$('#xm').hidden=false};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(c))};
+$('#xClose').onclick=()=>$('#xm').hidden=true;
+
+drawBase();drawRing();drawAnn();sync();setRot();
+}
+</script>
+<script>
+{
+const tabs=[...document.querySelectorAll('[data-tab]')];
+const show=()=>{const t=location.hash==='#t16'?'t16':'ccv';tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  document.getElementById('pane-ccv').hidden=t!=='ccv';document.getElementById('pane-t16').hidden=t!=='t16'};
+tabs.forEach(b=>b.onclick=()=>{location.hash=b.dataset.tab;show()});
+addEventListener('hashchange',show);show();
+}
+{
+const TAU=2*Math.PI;
+const AU={mil:{n:6400,s:' ₥',d:0,l:'millièmes'},gr:{n:400,s:' gr',d:4,l:'grades'},deg:{n:360,s:'°',d:4,l:'degrés'}};
+let AN=6400;
+const setUnit=u=>{AN=AU[u].n};
+const rad=a=>a*TAU/AN, ang=r=>r*AN/TAU, nA=a=>((a%AN)+AN)%AN, sA=a=>{a=nA(a);return a>AN/2?a-AN:a};
+const gis=(dx,dy)=>nA(ang(Math.atan2(dx,dy)));
+const R_T=6370000,KREF=0.13;
+const corrNiv=D=>(1-KREF)*D*D/(2*R_T);
+function inverse(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return{dx,dy,G:gis(dx,dy),D:Math.hypot(dx,dy)}}
+function polar(a,G,D){return[a[0]+D*Math.sin(rad(G)),a[1]+D*Math.cos(rad(G))]}
+function cmean(arr){let s=0,c=0;for(const a of arr){s+=Math.sin(rad(a));c+=Math.cos(rad(a))}return nA(ang(Math.atan2(s,c)))}
+function intersect(A,Ga,B,Gb){const d1=[Math.sin(rad(Ga)),Math.cos(rad(Ga))],d2=[Math.sin(rad(Gb)),Math.cos(rad(Gb))];
+  const cr=(u,v)=>u[0]*v[1]-u[1]*v[0],den=cr(d1,d2);if(Math.abs(den)<1e-9)return null;
+  const t=cr([B[0]-A[0],B[1]-A[1]],d2)/den,u=cr([B[0]-A[0],B[1]-A[1]],d1)/den;return{P:[A[0]+t*d1[0],A[1]+t*d1[1]],t,u}}
+function det3(m){return m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])-m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])+m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0])}
+function resection(P,L){
+  // P: 3 points connus [x,y] ; L: lectures Hz (unité courante). Inconnues : x,y,V0.
+  const cx=P.reduce((s,p)=>s+p[0],0)/3,cy=P.reduce((s,p)=>s+p[1],0)/3,Q=P.map(p=>[p[0]-cx,p[1]-cy]),Lr=L.map(rad);
+  const rows=t=>Q.map((p,i)=>{const g=t+Lr[i],c=Math.cos(g),s=Math.sin(g);return[c,-s,p[0]*c-p[1]*s]});
+  const f=t=>det3(rows(t));const N=7200;let best=null,prev=f(0),mx=0;
+  const solveXY=t=>{const r=rows(t);let a=0,b=0,d=0,e=0,g=0;for(const[c,s,k]of r){a+=c*c;b+=c*s;d+=s*s;e+=c*k;g+=s*k}const D=a*d-b*b;if(Math.abs(D)<1e-12)return null;return[(e*d-b*g)/D,(a*g-b*e)/D]};
+  for(let i=1;i<=N;i++){const t1=i*TAU/N,v=f(t1);mx=Math.max(mx,Math.abs(v));
+    if(prev===0||prev*v<0){let lo=(i-1)*TAU/N,hi=t1,fl=f(lo);for(let k=0;k<70;k++){const m=(lo+hi)/2,fm=f(m);if(fl*fm<=0)hi=m;else{lo=m;fl=fm}}
+      const t=(lo+hi)/2,xy=solveXY(t);if(xy){let res=0;Q.forEach((p,j)=>{const g=Math.atan2(p[0]-xy[0],p[1]-xy[1]);let e=g-(t+Lr[j]);e=Math.atan2(Math.sin(e),Math.cos(e));res+=Math.abs(e)});
+        if(!best||res<best.res)best={t,xy,res}}}
+    prev=v}
+  if(!best)return null;
+  const X=best.xy[0]+cx,Y=best.xy[1]+cy;
+  // cercle dangereux : distance relative au cercle circonscrit
+  const[a,b,c]=P,dd=2*(a[0]*(b[1]-c[1])+b[0]*(c[1]-a[1])+c[0]*(a[1]-b[1]));let danger=null;
+  if(Math.abs(dd)>1e-9){const s=p=>p[0]*p[0]+p[1]*p[1];const ux=(s(a)*(b[1]-c[1])+s(b)*(c[1]-a[1])+s(c)*(a[1]-b[1]))/dd,uy=(s(a)*(c[0]-b[0])+s(b)*(a[0]-c[0])+s(c)*(b[0]-a[0]))/dd,Rc=Math.hypot(a[0]-ux,a[1]-uy);danger=Math.abs(Math.hypot(X-ux,Y-uy)-Rc)/Rc}
+  return{P:[X,Y],V0:nA(ang(best.t)),res:ang(best.res),danger,flat:mx}}
+function traverse(o){
+  // o: {A,R,rows:[{ar,av,d}],B?,F?}
+  const n=o.rows.length;let alpha=o.rows.map(r=>nA(r.av-r.ar));
+  let fa=null;const half=AN/2;
+  const run=al=>{let Gback=inverse(o.A,o.R).G,pts=[o.A],G=[];
+    for(let i=0;i<n-1;i++){const g=nA(Gback+al[i]);G.push(g);const p=polar(pts[i],g,o.rows[i].d);pts.push(p);Gback=nA(g+half)}
+    return{pts,G,Gback}};
+  let r=run(alpha);
+  if(o.B&&o.F){const Gc=nA(r.Gback+alpha[n-1]),Gk=inverse(o.B,o.F).G;fa=sA(Gc-Gk);alpha=alpha.map(a=>a-fa/n);r=run(alpha)}
+  let fx=null,fy=null,fl=null,sumD=0,comp=r.pts.map(p=>p.slice());
+  for(let i=0;i<n-1;i++)sumD+=o.rows[i].d;
+  if(o.B){const last=r.pts[n-1];fx=last[0]-o.B[0];fy=last[1]-o.B[1];fl=Math.hypot(fx,fy);let cum=0;
+    comp=r.pts.map((p,i)=>{if(i>0)cum+=o.rows[i-1].d;const k=sumD?cum/sumD:0;return[p[0]-fx*k,p[1]-fy*k]})}
+  return{alpha,G:r.G,raw:r.pts,pts:comp,fa,fx,fy,fl,sumD}}
+const $t=s=>document.querySelector(s);
+const ok=v=>typeof v==='number'&&isFinite(v);
+const nb=s=>{if(s==null)return NaN;const t=String(s).replace(/[\s  ]/g,'').replace(',','.');return t===''?NaN:+t};
+const fm=(v,d)=>v.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fs=(v,d)=>{const r=+v.toFixed(d);return(r>0?'+':r<0?'−':'')+fm(Math.abs(r),d)};
+let TU='mil';
+const fa=a=>fm(nA(a),AU[TU].d)+AU[TU].s, fsa=a=>fs(a,1)+AU[TU].s;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const HALF=()=>AN/2;
+const fc=v=>fm(v,0)+' m';
+const fd=v=>fm(v,1)+' m';
+const PROC=[
+{id:'gds',t:'GDS',d:'Gisement, distance et site entre deux points de coordonnées connues.',
+ g:[['Point de départ A',[['ax','X','52340','m'],['ay','Y','61215','m'],['az','Z','152','m?']]],['Point d\'arrivée B',[['bx','X','53211','m'],['by','Y','61080','m'],['bz','Z','165','m?']]]],
+ c:v=>{const r=inverse([v.ax,v.ay],[v.bx,v.by]);if(r.D===0)return{err:'Les deux points sont confondus.'};
+  const o={res:[['Gisement A → B',fa(r.G),1],['Distance horizontale',fd(r.D),1],['Gisement B → A',fa(r.G+HALF())],['ΔX / ΔY',`${fs(r.dx,0)} / ${fs(r.dy,0)} m`]],
+   st:[`ΔX = XB − XA = ${fs(r.dx,0)} m ; ΔY = YB − YA = ${fs(r.dy,0)} m`,'G = arctan(ΔX / ΔY), placé dans le quadrant donné par les signes de ΔX et ΔY',`D = √(ΔX² + ΔY²) = ${fd(r.D)}`]};
+  if(ok(v.az)&&ok(v.bz)){const dz=v.bz-v.az,si=ang(Math.atan2(dz,r.D));o.res.splice(2,0,['Site A → B',fsa(si),1]);o.res.push(['Dénivelée A → B',fs(dz,1)+' m'],['Distance suivant la pente',fd(Math.hypot(r.D,dz))]);
+   o.st.push(`Site = arctan(ΔZ / D) = ${fsa(si)} (positif si B est plus haut que A)`)}
+  else o.warn='Renseignez les deux altitudes Z pour obtenir le site.';
+  return o}},
+{id:'ray',t:'Rayonnement direct',d:'Station sur un point connu : coordonnées d\'un point visé à partir du gisement et de la distance.',
+ g:[['Station S (point connu)',[['sx','X','52340','m'],['sy','Y','61215','m'],['sz','Z','152','m?'],['hi','Hauteur instrument','1.55','m?']]],['Point visé P',[['g','Gisement S → P','1756.6','a'],['di','Distance mesurée','881.49','m'],['pv','Site (vide si distance horizontale)','14.7','a?']]]],
+ c:v=>{const S=[v.sx,v.sy],G=nA(v.g),incl=ok(v.pv),Dh=incl?v.di*Math.cos(rad(v.pv)):v.di,P=polar(S,G,Dh),
+  o={res:[['X du point P',fc(P[0]),1],['Y du point P',fc(P[1]),1],['Distance horizontale',fd(Dh)]],
+  st:[incl?`Dh = Di × cos site = ${fd(Dh)}`:'Distance saisie prise comme horizontale',`XP = XS + Dh × sin G = ${fc(P[0])}`,`YP = YS + Dh × cos G = ${fc(P[1])}`]};
+  if(incl&&ok(v.sz)){const c=T.cn?corrNiv(Dh):0,dz=v.di*Math.sin(rad(v.pv))+(ok(v.hi)?v.hi:0)+c;o.res.push(['Dénivelée S → P',fs(dz,1)+' m'],['Z du point P',fc(v.sz+dz),1]);o.st.push(`Δh = Di × sin site + hi${T.cn?' + correction de niveau apparent':''}`)}return o}},
+{id:'rinv',t:'Rayonnement inverse',d:'Station sur un point inconnu, visant un point connu : coordonnées de la station à partir du gisement et de la distance.',
+ g:[['Point connu A',[['ax','X','52340','m'],['ay','Y','61215','m'],['az','Z','152','m?']]],['Station S (inconnue)',[['hi','Hauteur instrument','1.55','m?']]],['Visée sur A',[['g','Gisement S → A','4956.6','a'],['di','Distance mesurée','881.49','m'],['si','Site (vide si distance horizontale)','-14.2','a?']]]],
+ c:v=>{const G=nA(v.g),incl=ok(v.si),Dh=incl?v.di*Math.cos(rad(v.si)):v.di,S=polar([v.ax,v.ay],nA(G+HALF()),Dh),
+  o={res:[['X de la station',fc(S[0]),1],['Y de la station',fc(S[1]),1],['Gisement A → S',fa(G+HALF())],['Distance horizontale',fd(Dh)]],
+  st:[`G(A → S) = G(S → A) ± 3200 ₥ = ${fa(G+HALF())}`,incl?`Dh = Di × cos site = ${fd(Dh)}`:'Distance saisie prise comme horizontale','XS = XA + Dh × sin G(A → S) ; YS = YA + Dh × cos G(A → S)']};
+  if(incl&&ok(v.az)){const c=T.cn?corrNiv(Dh):0,dz=v.di*Math.sin(rad(v.si))+(ok(v.hi)?v.hi:0)+c;o.res.push(['Dénivelée S → A',fs(dz,1)+' m'],['Z de la station',fc(v.az-dz),1]);o.st.push(`Δh = Di × sin site + hi${T.cn?' + correction de niveau apparent':''}`,'ZS = ZA − Δh')}return o}},
+{id:'int',t:'Intersection inverse',d:'Station inconnue visant deux points connus A et B ; un troisième point C sert de contrôle.',
+ g:[['Point A',[['ax','X','52340','m'],['ay','Y','61215','m'],['ag','Gisement S → A','4956.6','a']]],['Point B',[['bx','X','53850','m'],['by','Y','62481','m'],['bg','Gisement S → B','435.9','a']]],['Point C (contrôle, facultatif)',[['cx','X','54120','m?'],['cy','Y','60411','m?'],['cg','Gisement S → C','2246.3','a?']]]],
+ c:v=>{const A=[v.ax,v.ay],B=[v.bx,v.by],Ga=nA(v.ag),Gb=nA(v.bg),r=intersect(A,nA(Ga+HALF()),B,nA(Gb+HALF()));
+  if(!r||r.t<=0||r.u<=0)return{err:'Les deux visées ne se recoupent pas : vérifiez les gisements.'};
+  const S=r.P,gam=nA(Gb-Ga),gm=Math.min(gam,AN-gam),o={res:[['X de la station',fc(S[0]),1],['Y de la station',fc(S[1]),1],['Distance S → A',fd(r.t)],['Distance S → B',fd(r.u)],['Angle entre les visées A et B',fa(gm)]],
+   st:[`G(A → S) = G(S → A) ± 3200 ₥ = ${fa(Ga+HALF())}`,`G(B → S) = G(S → B) ± 3200 ₥ = ${fa(Gb+HALF())}`,'La station est à l\'intersection des droites issues de A et de B avec ces gisements retour.']};
+  if(gm<533||gm>2667)o.warn='Angle entre les visées défavorable (hors 533 ₥ à 2667 ₥) : précision médiocre.';
+  if(ok(v.cx)&&ok(v.cy)&&ok(v.cg)){const C=[v.cx,v.cy],ic=inverse(S,C),e=sA(nA(v.cg)-ic.G),lat=ic.D*Math.sin(rad(e));
+   o.res.push(['Contrôle C : gisement calculé',fa(ic.G)],['Contrôle C : gisement mesuré',fa(v.cg)],['Écart de contrôle',fsa(e),1],['Écart latéral à la distance de C',fm(Math.abs(lat),1)+' m']);
+   o.st.push('Contrôle : G(S → C) calculé à partir des coordonnées obtenues, comparé au gisement mesuré sur C.')}
+  else o.warn=(o.warn?o.warn+' ':'')+'Sans point de contrôle, une erreur de mesure passe inaperçue.';
+  return o}},
+{id:'chem',t:'Cheminement',d:'Polygonale depuis un point connu orienté sur une référence ; fermeture et compensation facultatives.',custom:1},
+{id:'rel',t:'Relèvement',d:'Station inconnue déterminée par visées sur trois points connus (problème de Pothenot).',
+ g:[['Point A',[['ax','X','52340','m'],['ay','Y','61215','m'],['ah','Gisement mesuré sur A','4956.6','a']]],['Point B',[['bx','X','53850','m'],['by','Y','62481','m'],['bh','Gisement mesuré sur B','435.9','a']]],['Point C',[['cx','X','54120','m'],['cy','Y','60411','m'],['ch','Gisement mesuré sur C','2246.3','a']]]],
+ c:v=>{const P=[[v.ax,v.ay],[v.bx,v.by],[v.cx,v.cy]],r=resection(P,[v.ah,v.bh,v.ch]);
+  if(!r)return{err:'Pas de solution : points alignés, lectures incohérentes ou station sur le cercle dangereux.'};
+  const o={res:[['X de la station',fc(r.P[0]),1],['Y de la station',fc(r.P[1]),1],['Correction d\'orientation',fsa(sA(r.V0))]],
+   st:['Inconnues : X, Y de la station et la correction d\'orientation commune aux trois gisements mesurés.','Chaque visée impose que la station soit sur la droite passant par le point visé avec le gisement mesuré corrigé.','La correction retenue est celle pour laquelle les trois droites concourent ; X et Y en découlent.']};
+  ['A','B','C'].forEach((n,i)=>o.res.push([`G(station → ${n})`,fa(inverse(r.P,P[i]).G)]));
+  if(r.danger!=null&&r.danger<.1)o.warn='Station proche du cercle passant par A, B et C (cercle dangereux) : résultat peu fiable.';return o}},
+{id:'tri',t:'Trilatération',d:'Point P déterminé par ses distances à deux points connus ; un troisième point facultatif lève l\'ambiguïté.',
+ g:[['Point A',[['ax','X','52340','m'],['ay','Y','61215','m'],['da','Distance A → P','881.4','m']]],['Point B',[['bx','X','53850','m'],['by','Y','62481','m'],['db','Distance B → P','1539.8','m']]],['Point C (facultatif)',[['cx','X','54120','m?'],['cy','Y','60411','m?'],['dc','Distance C → P','1128.6','m?']]]],
+ c:v=>{const A=[v.ax,v.ay],B=[v.bx,v.by],ab=inverse(A,B),d=ab.D;if(d<=0)return{err:'A et B sont confondus.'};
+  const a=(v.da*v.da-v.db*v.db+d*d)/(2*d),h2=v.da*v.da-a*a;if(h2<0)return{err:'Distances incompatibles : les deux cercles ne se coupent pas.'};
+  const h=Math.sqrt(h2),u=[ab.dx/d,ab.dy/d],M=[A[0]+a*u[0],A[1]+a*u[1]],Pd=[M[0]+h*u[1],M[1]-h*u[0]],Pg=[M[0]-h*u[1],M[1]+h*u[0]];
+  const o={res:[],st:[`AB = ${fd(d)} ; G(A → B) = ${fa(ab.G)}`,`Projection de P sur AB : a = (dA² − dB² + AB²) / 2AB = ${fd(a)}`,`Écart à la ligne AB : h = √(dA² − a²) = ${fd(h)}`,'Deux solutions symétriques par rapport à AB.']};
+  if(ok(v.cx)&&ok(v.cy)&&ok(v.dc)){const C=[v.cx,v.cy],ed=inverse(C,Pd).D-v.dc,eg=inverse(C,Pg).D-v.dc,P=Math.abs(ed)<=Math.abs(eg)?Pd:Pg,e=Math.min(Math.abs(ed),Math.abs(eg));
+   o.res.push(['X de P',fc(P[0]),1],['Y de P',fc(P[1]),1],['Côté retenu',P===Pd?'à droite de A → B':'à gauche de A → B'],['Écart sur la distance C → P',fm(e,2)+' m'],['Gisement A → P',fa(inverse(A,P).G)]);
+   o.st.push('La distance mesurée depuis C désigne la solution retenue.')}
+  else{o.res.push(['P à droite de A → B : X / Y',`${fm(Pd[0],0)} / ${fm(Pd[1],0)} m`,1],['P à gauche de A → B : X / Y',`${fm(Pg[0],0)} / ${fm(Pg[1],0)} m`,1]);o.warn='Sans point C, choisissez la solution selon la position connue de P par rapport à AB.'}
+  return o}},
+{id:'base',t:'Base chaînée',d:'Distance d\'un point inaccessible P par une base AB mesurée au ruban et les gisements mesurés en A et en B.',
+ g:[['Base',[['b','Longueur AB (ruban)','120.00','m']]],['Station A',[['ab','Gisement A → B','2400.0','a'],['ap','Gisement A → P','1756.6','a']]],['Station B',[['ba','Gisement B → A','5600.0','a'],['bp','Gisement B → P','1664.9','a']]],['Coordonnées de A (facultatif)',[['ax','X de A','52340','m?'],['ay','Y de A','61215','m?']]]],
+ c:v=>{const da=nA(v.ap-v.ab),db=nA(v.bp-v.ba),al=Math.min(da,AN-da),be=Math.min(db,AN-db),ga=HALF()-al-be;
+  if(ga<=0)return{err:'Gisements incompatibles : la somme des angles en A et B dépasse 3200 ₥.'};
+  const k=v.b/Math.sin(rad(ga)),AP=k*Math.sin(rad(be)),BP=k*Math.sin(rad(al)),o={res:[['Distance A → P',fd(AP),1],['Distance B → P',fd(BP)],['Angle en A',fa(al)],['Angle en B',fa(be)],['Angle en P',fa(ga)]],
+   st:[`Angle en A = |G(A → P) − G(A → B)| = ${fa(al)} ; angle en B = |G(B → P) − G(B → A)| = ${fa(be)}`,`Angle en P = 3200 − A − B = ${fa(ga)}`,'Loi des sinus : AP = AB × sin B / sin P ; BP = AB × sin A / sin P']};
+  if(ok(v.ax)&&ok(v.ay)){const P=polar([v.ax,v.ay],nA(v.ap),AP);o.res.unshift(['X de P',fc(P[0]),1],['Y de P',fc(P[1]),1]);o.st.push('Coordonnées de P par rayonnement depuis A avec G(A → P) et AP')}
+  if(ga<50)o.warn='Angle en P très faible : allongez la base pour améliorer la précision.';return o}}
+];
+const T={u:'mil',p:'gds',cn:true,v:{},ch:{ax:'52340',ay:'61215',rx:'53850',ry:'62481',bx:'54015',by:'61011',fx:'54120',fy:'60411'},
+ rows:[{"n":"S1","ar":"889.4","av":"2234.4","d":"677.13"},{"n":"S2","ar":"5434.5","av":"1894.5","d":"595.77"},{"n":"S3","ar":"5094.7","av":"1011.5","d":"661.24"},{"n":"S4","ar":"4211.6","av":"3023.8","d":""}]};
+const DEF={};PROC.forEach(p=>(p.g||[]).forEach(([,fl])=>fl.forEach(f=>DEF[p.id+'_'+f[0]]=f[2])));
+const CHDEF=JSON.stringify({ch:T.ch,rows:T.rows});
+try{const d=JSON.parse(localStorage.getItem('t16-v5'));if(d)Object.assign(T,d)}catch(e){}
+for(const k in DEF)if(!(k in T.v))T.v[k]=DEF[k];
+const saveT=()=>{try{localStorage.setItem('t16-v5',JSON.stringify(T))}catch(e){}};
+T.u='mil';TU='mil';setUnit(TU);if(!PROC.some(p=>p.id===T.p))T.p='gds';
+const isA=(p,k)=>{const f=p.g.flatMap(x=>x[1]).find(f=>f[0]===k);return f&&f[3][0]==='a'};
+function inputHTML(id,label,val,kind){const u=kind[0]==='a'?AU[TU].s.trim():'m';return`<label>${label} (${u})<input id="${id}" inputmode="decimal" autocomplete="off" value="${esc(val)}"></label>`}
+function renderIn(){const p=PROC.find(x=>x.id===T.p);$t('#pt').textContent=p.t;$t('#pd').textContent=p.d;
+  if(p.custom){$t('#pin').innerHTML=`<fieldset><legend>Départ</legend><div class="fg">${inputHTML('ch_ax','X station 1',T.ch.ax,'m')}${inputHTML('ch_ay','Y station 1',T.ch.ay,'m')}${inputHTML('ch_rx','X référence arrière',T.ch.rx,'m')}${inputHTML('ch_ry','Y référence arrière',T.ch.ry,'m')}</div></fieldset>
+  <fieldset><legend>Stations (gisements mesurés et distance horizontale vers la station suivante)</legend>${T.rows.map((r,i)=>`<div class="srow"><label>Nom<input id="r_${i}_n" value="${esc(r.n)}"></label>${inputHTML(`r_${i}_ar`,i?'Gisement arrière':'Gisement sur réf.',r.ar,'a')}${inputHTML(`r_${i}_av`,i===T.rows.length-1?'Gisement sur réf. fermeture':'Gisement avant',r.av,'a')}${i<T.rows.length-1?inputHTML(`r_${i}_d`,'Distance',r.d,'m'):'<span></span>'}</div>`).join('')}
+  <div class="row"><button id="rAdd">Ajouter une station</button><button id="rDel">Retirer la dernière</button></div></fieldset>
+  <fieldset><legend>Fermeture (facultatif)</legend><div class="fg">${inputHTML('ch_bx','X dernière station',T.ch.bx,'m')}${inputHTML('ch_by','Y dernière station',T.ch.by,'m')}${inputHTML('ch_fx','X référence fermeture',T.ch.fx,'m')}${inputHTML('ch_fy','Y référence fermeture',T.ch.fy,'m')}</div></fieldset>`;
+   $t('#rAdd').onclick=()=>{T.rows.push({n:'S'+(T.rows.length+1),ar:'',av:'',d:''});saveT();renderIn()};
+   $t('#rDel').onclick=()=>{if(T.rows.length>2){T.rows.pop();saveT();renderIn()}}}
+  else $t('#pin').innerHTML=p.g.map(([n,fl])=>`<fieldset><legend>${n}</legend><div class="fg">${fl.map(f=>inputHTML(p.id+'_'+f[0],f[1],T.v[p.id+'_'+f[0]],f[3])).join('')}</div></fieldset>`).join('');
+  $t('#pnav').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===T.p));calcT()}
+function calcChem(){const c={};for(const k in T.ch)c[k]=nb(T.ch[k]);const rows=T.rows.map(r=>({ar:nb(r.ar),av:nb(r.av),d:nb(r.d)})),n=rows.length;
+  if(![c.ax,c.ay,c.rx,c.ry].every(ok))return{err:'Renseignez les coordonnées de la station 1 et de la référence arrière.'};
+  for(let i=0;i<n-1;i++)if(!ok(rows[i].ar)||!ok(rows[i].av)||!ok(rows[i].d))return{err:`Lectures ou distance manquantes à la station ${i+1}.`};
+  const B=ok(c.bx)&&ok(c.by)?[c.bx,c.by]:null,F=B&&ok(c.fx)&&ok(c.fy)&&ok(rows[n-1].ar)&&ok(rows[n-1].av)?[c.fx,c.fy]:null;
+  const t=traverse({A:[c.ax,c.ay],R:[c.rx,c.ry],rows:F?rows:rows.map((r,i)=>i===n-1?{ar:0,av:0,d:0}:r),B,F}),o={res:[],st:[],tbl:t};
+  if(t.fa!=null)o.res.push(['Écart de fermeture angulaire',fsa(t.fa),1],['Correction par angle',fsa(-t.fa/n)]);
+  if(t.fl!=null)o.res.push(['Écart de fermeture linéaire',fm(t.fl,3)+' m',1],['fx / fy',`${fs(t.fx,3)} / ${fs(t.fy,3)} m`],['Longueur totale',fd(t.sumD)],['Précision relative',t.fl>0?'1 / '+fm(Math.round(t.sumD/t.fl),0):'exacte']);
+  if(!B)o.warn='Cheminement non fermé (en antenne) : aucun contrôle possible.';
+  o.st=['Angle à chaque station = gisement avant − gisement arrière.','G(avant) = G(arrière) + angle ; G(arrière) de la station suivante = G(avant) ± '+fa(HALF())+'.','ΔX = D × sin G ; ΔY = D × cos G, cumulés depuis la station 1.'];
+  if(F)o.st.push('Fermeture angulaire : gisement calculé vers la référence de fermeture − gisement connu, réparti également sur les angles.');
+  if(B)o.st.push('Fermeture linéaire : écart réparti proportionnellement aux distances cumulées.');return o}
+function calcT(){const p=PROC.find(x=>x.id===T.p);let o;
+  if(p.custom)o=calcChem();else{const v={},miss=[];p.g.forEach(([gn,fl])=>fl.forEach(f=>{const x=nb(T.v[p.id+'_'+f[0]]);v[f[0]]=x;if(!ok(x)&&!f[3].includes('?'))miss.push(`${f[1]} (${gn})`)}));
+    o=miss.length?{err:'À renseigner : '+miss.join(', ')+'.'}:p.c(v)}
+  let h='';if(o.err)h=`<p class="warn">${esc(o.err)}</p>`;else{
+    h=`<dl class="res">${o.res.map(([k,val,b])=>`<dt>${esc(k)}</dt><dd${b?' class="hl"':''}>${esc(val)}</dd>`).join('')}</dl>`;
+    if(o.tbl){const t=o.tbl;h+=`<div class="scroll"><table><thead><tr><th>Station</th><th>Angle</th><th>Gisement avant</th><th>X</th><th>Y</th></tr></thead><tbody>${T.rows.map((r,i)=>`<tr><td>${esc(r.n)}</td><td>${i<T.rows.length-1||t.fa!=null?fa(t.alpha[i]):'—'}</td><td>${i<t.G.length?fa(t.G[i]):'—'}</td><td>${fm(t.pts[i][0],0)}</td><td>${fm(t.pts[i][1],0)}</td></tr>`).join('')}</tbody></table></div>`}
+    if(o.warn)h+=`<p class="warn">${esc(o.warn)}</p>`;
+    h+=`<details class="det"><summary>Détail du calcul</summary><ol>${o.st.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></details>`}
+  $t('#pout').innerHTML=h;$t('#pout').dataset.txt=o.err?'':p.t+'\n'+o.res.map(r=>r[0]+' : '+r[1]).join('\n')+(o.tbl?'\n'+T.rows.map((r,i)=>`${r.n} : X ${fm(o.tbl.pts[i][0],0)} ; Y ${fm(o.tbl.pts[i][1],0)}`).join('\n'):'')}
+$t('#pnav').innerHTML=PROC.map(p=>`<button data-p="${p.id}">${p.t}</button>`).join('');
+$t('#pnav').onclick=e=>{const b=e.target.closest('[data-p]');if(b){T.p=b.dataset.p;saveT();renderIn()}};
+$t('#pin').addEventListener('input',e=>{const id=e.target.id;let m;
+  if(m=id.match(/^r_(\d+)_(\w+)$/))T.rows[+m[1]][m[2]]=e.target.value;else if(id.startsWith('ch_'))T.ch[id.slice(3)]=e.target.value;else T.v[id]=e.target.value;saveT();calcT()});
+$t('#cn').checked=T.cn;
+$t('#cn').onchange=e=>{T.cn=e.target.checked;saveT();calcT()};
+const rn=(a,b)=>a+Math.random()*(b-a),ri=(a,b)=>Math.round(rn(a,b)),r1=x=>(Math.round(x*10)/10).toFixed(1),r2=x=>(Math.round(x*100)/100).toFixed(2),sg=()=>Math.random()<.5?-1:1;
+const gi=(a,b)=>inverse(a,b).G,di=(a,b)=>inverse(a,b).D,pt=()=>[ri(40000,90000),ri(40000,90000)],far=(A,d1,d2,G)=>{const p=polar(A,G==null?rn(0,6400):G,rn(d1,d2));return[Math.round(p[0]),Math.round(p[1])]};
+const visee=(Dh,dz)=>{const c=T.cn?corrNiv(Dh):0,h=dz-c;return{si:ang(Math.atan2(h,Dh)),Di:Math.hypot(Dh,h)}};
+const EX={
+ gds:()=>{const A=pt(),B=far(A,300,5000),za=ri(80,450);return{ax:A[0],ay:A[1],az:za,bx:B[0],by:B[1],bz:za+ri(-120,120)}},
+ ray:()=>{const S=pt(),P=far(S,200,3000),zs=ri(80,450),hi=rn(1.4,1.7),zp=zs+ri(-60,60),Dh=di(S,P),m=visee(Dh,zp-zs-+r2(hi));return{sx:S[0],sy:S[1],sz:zs,hi:r2(hi),g:r1(gi(S,P)),di:r2(m.Di),pv:r1(m.si)}},
+ rinv:()=>{const A=pt(),S=far(A,200,3000),za=ri(80,450),zs=za+ri(-60,60),hi=rn(1.4,1.7),Dh=di(S,A),m=visee(Dh,za-zs-+r2(hi));return{ax:A[0],ay:A[1],az:za,hi:r2(hi),g:r1(gi(S,A)),di:r2(m.Di),si:r1(m.si)}},
+ int:()=>{const S=pt(),g=rn(0,6400),A=far(S,800,4000,g),B=far(S,800,4000,g+sg()*rn(900,2300)),C=far(S,800,4000,g+3200+rn(-600,600));return{ax:A[0],ay:A[1],ag:r1(gi(S,A)),bx:B[0],by:B[1],bg:r1(gi(S,B)),cx:C[0],cy:C[1],cg:r1(nA(gi(S,C)+rn(-.3,.3)))}},
+ rel:()=>{const S=pt(),g=rn(0,6400),e=rn(-3,3),A=far(S,800,4000,g),B=far(S,800,4000,g+rn(1500,2500)),C=far(S,800,4000,g+rn(3700,4800));return{ax:A[0],ay:A[1],ah:r1(nA(gi(S,A)+e)),bx:B[0],by:B[1],bh:r1(nA(gi(S,B)+e)),cx:C[0],cy:C[1],ch:r1(nA(gi(S,C)+e))}},
+ tri:()=>{const P=pt(),g=rn(0,6400),A=far(P,500,3000,g),B=far(P,500,3000,g+sg()*rn(1000,2200)),C=far(P,500,3000,g+3200+rn(-500,500));return{ax:A[0],ay:A[1],da:r1(di(A,P)),bx:B[0],by:B[1],db:r1(di(B,P)),cx:C[0],cy:C[1],dc:r1(di(C,P))}},
+ base:()=>{const A=pt(),gab=rn(0,6400),b=rn(60,200),B=polar(A,gab,b),P=polar(A,gab+sg()*rn(500,1400),rn(400,1800));return{b:r2(b),ab:r1(nA(gab)),ap:r1(gi(A,P)),ba:r1(nA(gab+3200)),bp:r1(gi(B,P)),ax:A[0],ay:A[1]}},
+ chem:()=>{const n=ri(3,5),A=pt(),R=far(A,1000,3000),S=[A];let g=rn(0,6400);for(let i=1;i<n;i++){g+=rn(-900,900);S.push(far(S[i-1],300,900,g))}
+  const F=far(S[n-1],1000,3000),no=x=>x+rn(-.3,.3);
+  return{ch:{ax:String(A[0]),ay:String(A[1]),rx:String(R[0]),ry:String(R[1]),bx:String(S[n-1][0]),by:String(S[n-1][1]),fx:String(F[0]),fy:String(F[1])},
+   rows:S.map((s,i)=>({n:'S'+(i+1),ar:r1(nA(no(gi(s,i?S[i-1]:R)))),av:r1(nA(no(gi(s,i<n-1?S[i+1]:F)))),d:i<n-1?r2(di(s,S[i+1])+rn(-.04,.04)):''}))}}
+};
+$t('#pEx').onclick=()=>{const p=PROC.find(x=>x.id===T.p),e=EX[p.id]();
+  if(p.custom){T.ch=e.ch;T.rows=e.rows}else p.g.forEach(([,fl])=>fl.forEach(f=>{const k=f[0];T.v[p.id+'_'+k]=k in e?String(e[k]):''}));saveT();renderIn()};
+$t('#pClr').onclick=()=>{const p=PROC.find(x=>x.id===T.p);if(p.custom){for(const k in T.ch)T.ch[k]='';T.rows=T.rows.map((r,i)=>({n:'S'+(i+1),ar:'',av:'',d:''}))}
+  else p.g.forEach(([,fl])=>fl.forEach(f=>T.v[p.id+'_'+f[0]]=''));saveT();renderIn()};
+$t('#pCp').onclick=async e=>{const b=e.currentTarget,t=$t('#pout').dataset.txt;if(!t)return;try{await navigator.clipboard.writeText(t);b.textContent='Copié'}catch(er){b.textContent='Copie refusée'}setTimeout(()=>b.textContent='Copier les résultats',1600)};
+renderIn();
+}
+</script>
+<script>
+// Installation hors ligne : enregistre le service worker (fichier sw.js à côté de cette page).
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>

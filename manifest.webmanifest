@@ -1,0 +1,17 @@
+{
+  "name": "CCV et calculs T16",
+  "short_name": "CCV T16",
+  "description": "Calculateur des composantes du vent annotable et calculs topographiques au théodolite T16, utilisable hors ligne.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#55653b",
+  "theme_color": "#55653b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
